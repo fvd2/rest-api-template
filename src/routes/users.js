@@ -1,6 +1,5 @@
 const UserController = require('../controllers/UserController')
 const validateToken = require('../middlewares/validateToken')
-const isAdmin = require('../middlewares/isAdmin')
 
 const router = require('express').Router()
 

@@ -3,8 +3,9 @@ const AuthDAO = require('../dao/authDAO')
 const UsersDAO = require('../dao/usersDAO')
 const bcrypt = require('bcryptjs')
 
-const createHash = async (password) => await bcrypt.hash(password, 10)
-const compareHash = async (password, hash) => await bcrypt.compare(password, hash)
+const createHash = async password => await bcrypt.hash(password, 10)
+const compareHash = async (password, hash) =>
+	await bcrypt.compare(password, hash)
 
 module.exports = {
 	register: async (req, res) => {
@@ -25,7 +26,10 @@ module.exports = {
 				'A user with this e-mail address already exists'
 			)
 		} else {
-			const result = await UsersDAO.addUser(req.body.email, await createHash(req.body.password))
+			const result = await UsersDAO.addUser(
+				req.body.email,
+				await createHash(req.body.password)
+			)
 			if (result.success) return res.status(201).send(result)
 			return res.status(404).send(result)
 		}
@@ -43,10 +47,11 @@ module.exports = {
 			res.status(400).send('Password is empty or less than 8 characters')
 		}
 		const userData = await UsersDAO.getUser(req.body.email)
-		console.log(await compareHash(req.body.password, userData.password))
-		console.log(userData.password)
 		if (!userData) return res.status(400).send('Unknown email address')
-		if (!compareHash(req.body.password, userData.password)) return res.status(401).send({message: 'Entered credential are invalid'})
+		if (!compareHash(req.body.password, userData.password))
+			return res
+				.status(401)
+				.send({ message: 'Entered credential are invalid' })
 		else {
 			const accessToken = jwt.sign(
 				{ email: req.body.email },
@@ -61,21 +66,39 @@ module.exports = {
 			res.cookie('RefreshToken', refreshToken, {
 				secure: true,
 				httpOnly: true,
-				sameSite: true,
+				sameSite: true
 			}).json({ accessToken })
 			await AuthDAO.login(userData.email, refreshToken)
 		}
 	},
-    token: async(req, res) => {
-        const user = await db.findOne('users', { filter: { refreshToken: req.cookies.RefreshToken }, options: { projection: { email: 1, isAdmin: 1 }}})
+	logout: async (req, res) => {
+		const user = await AuthDAO.findSession({
+			refreshToken: req.cookies.RefreshToken
+		})
+		console.log(user)
 		if (user) {
-            const accessToken = jwt.sign(
-                { email: user.email },
-                process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: 60 * 15 }
-            )
-            res.status(200).send({ accessToken })
-        }
-        else res.status(401).send({ error: 'no refresh token was found - please login again'})
-    }
+			const result = await AuthDAO.logout({ email: user.email })
+			if (result.success) {
+				res.status(200).send({
+					message: 'Successfully logged out user'
+				})
+			} else res.status(401).send({error: 'Could not log user out'})
+		} else res.status(401).send({ error: 'Could not find session' })
+	},
+	token: async (req, res) => {
+		const user = await AuthDAO.updateAccessToken({
+			refreshToken: req.cookies.RefreshToken
+		})
+		if (user) {
+			const accessToken = jwt.sign(
+				{ email: user.email },
+				process.env.ACCESS_TOKEN_SECRET,
+				{ expiresIn: 60 * 15 }
+			)
+			res.status(200).send({ accessToken })
+		} else
+			res.status(401).send({
+				error: 'no refresh token was found - please login again'
+			})
+	}
 }

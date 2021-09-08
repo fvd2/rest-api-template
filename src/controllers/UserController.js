@@ -4,7 +4,7 @@ module.exports = {
 	delete: async (req, res) => {
         const email = req.query.email
         if (!email) return res.sendStatus(400)
-		const result = await UsersDAO.deleteUser({ email: res.locals.email })
+		const result = await UsersDAO.deleteUser({ email: req.query.email })
 		if (result.success)
 			return res.status(200).send({
 				message: `Successfully deleted user: ${req.query.email}`,
@@ -14,7 +14,7 @@ module.exports = {
 	update: async (req, res) => {
 		const email = req.query.email
 		const result = await UsersDAO.updateEmail(email)
-		if (result.success) return res.status(200).send({ message: 'Successfully updated email address'})
+		if (result.success) return res.status(200).send({ message: `Successfully updated email address to ${email}`})
      	return res.status(400).send({message: 'bad request'})
 	},
 }

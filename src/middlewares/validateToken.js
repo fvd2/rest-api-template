@@ -1,4 +1,3 @@
-const db = require('../controllers/DbController')
 const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {

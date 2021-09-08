@@ -1,5 +1,4 @@
 let users
-let sessions
 
 module.exports = class UsersDAO {
 	static injectDB = async conn => {
@@ -46,7 +45,7 @@ module.exports = class UsersDAO {
 			filter: { email: { $in: [email] } },
 			options: { $set: { email: email } }
 		})
-        if (updatedCount === 1) return { success: true }
+        if (modifiedCount === 1) return { success: true }
         return { success: false }
 	}
 }
