@@ -1,5 +1,5 @@
 # rest-api-template
-A template for a RESTful API that manages user authentication and can be easily extended with functionality to serve as a back-end for web applications  
+A template for a RESTful API that manages user authentication with MongoDB and can be easily extended with functionality to serve as a back-end for web applications. For the structure I was inspired by the mflix API from MongoDB's 'MongoDB for JavaScript Developers' course (M220JS). 
 
 # Functionality
 ## Authentication
