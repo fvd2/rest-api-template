@@ -1,17 +1,18 @@
 let users
+let sessions
 
 module.exports = class UsersDAO {
-	static injectDB = async conn => {
-		if (users) {
+	static injectDB = async db => {
+		if (users && sessions) {
 			return
 		}
 		try {
-			users = await conn.db(process.env.MONGO_DB_NAME).collection('users')
+			users = await db.collection('users')
+			sessions = await db.collection('sessions')
 		} catch (err) {
 			console.error(
-				`Could not establish collection handles in userDAO: ${e}`
+				`Could not establish collection handles in userDAO: ${err}`
 			)
-			return { error: err }
 		}
 	}
 
@@ -31,8 +32,9 @@ module.exports = class UsersDAO {
 
 	static deleteUser = async email => {
 		try {
-			const { deletedCount } = users.deleteOne({ email })
-			if (deletedCount === 1) return { success: true }
+			const deleteUserResult = await users.deleteOne({ email })
+			const deleteSessionResult = await sessions.deleteOne({ email })
+			if (deleteUserResult.deletedCount === 1) return { success: true }
 			return { success: false }
 		} catch (err) {
 			console.error(`Failed to logout user: ${err}`)
@@ -40,12 +42,30 @@ module.exports = class UsersDAO {
 		}
 	}
 
-	static updateEmail = async email => {
-		const { modifiedCount } = users.updateOne({
-			filter: { email: { $in: [email] } },
-			options: { $set: { email: email } }
-		})
-        if (modifiedCount === 1) return { success: true }
-        return { success: false }
+	static updateEmail = async (currentEmail, newEmail) => {
+		try {
+			const updateUserResult = await users.updateOne(
+				{
+					email: currentEmail
+				},
+				{ $set: { email: newEmail } }
+			)
+			const updateSessionResult = await sessions.updateOne(
+				{
+					email: currentEmail
+				},
+				{ $set: { email: newEmail } }
+			)
+			console.log(updateSessionResult)
+			if (
+				updateUserResult.modifiedCount === 1 &&
+				updateSessionResult.modifiedCount === 1
+			)
+				return { success: true }
+			return { success: false }
+		} catch (err) {
+			console.error(`Failed to update email: ${err}`)
+			return { error: err }
+		}
 	}
 }

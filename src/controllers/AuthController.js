@@ -13,25 +13,25 @@ module.exports = {
 			!req.body.email ||
 			!/[A-Za-z0-9]+@[A-Za-z0-9]{2,}.[A-Za-z]{2,}/i.test(req.body.email)
 		) {
-			res.status(400).send(
-				'E-mail address is empty or incorrectly formatted'
+			res.status(400).json(
+				{message: 'E-mail address is empty or incorrectly formatted'}
 			)
 		}
 		if (!req.body.password || req.body.password.length < 8) {
-			res.status(400).send('Password is empty or less than 8 characters')
+			res.status(400).json({message: 'Password is empty or less than 8 characters'})
 		}
 		const foundUser = await UsersDAO.getUser(req.body.email)
 		if (foundUser) {
-			res.status(400).send(
-				'A user with this e-mail address already exists'
+			res.status(400).json(
+				{message: 'A user with this e-mail address already exists'}
 			)
 		} else {
 			const result = await UsersDAO.addUser(
 				req.body.email,
 				await createHash(req.body.password)
 			)
-			if (result.success) return res.status(201).send(result)
-			return res.status(404).send(result)
+			if (result.success) return res.status(201).json(result)
+			return res.status(404).json(result)
 		}
 	},
 	login: async (req, res) => {
@@ -40,14 +40,14 @@ module.exports = {
 			!/[A-Za-z0-9]+@[A-Za-z0-9]{2,}.[A-Za-z]{2,}/i.test(req.body.email)
 		) {
 			res.status(400).send(
-				'E-mail address is empty or incorrectly formatted'
+				{message: 'E-mail address is empty or incorrectly formatted'}
 			)
 		}
 		if (!req.body.password || req.body.password.length < 8) {
-			res.status(400).send('Password is empty or less than 8 characters')
+			res.status(400).send({message: 'Password is empty or less than 8 characters'})
 		}
 		const userData = await UsersDAO.getUser(req.body.email)
-		if (!userData) return res.status(400).send('Unknown email address')
+		if (!userData) return res.status(400).send({message: 'Unknown email address'})
 		if (!compareHash(req.body.password, userData.password))
 			return res
 				.status(401)
@@ -72,12 +72,9 @@ module.exports = {
 		}
 	},
 	logout: async (req, res) => {
-		const user = await AuthDAO.findSession({
-			refreshToken: req.cookies.RefreshToken
-		})
-		console.log(user)
+		const user = await AuthDAO.findSession(req.cookies.RefreshToken)
 		if (user) {
-			const result = await AuthDAO.logout({ email: user.email })
+			const result = await AuthDAO.logout(user.email)
 			if (result.success) {
 				res.status(200).send({
 					message: 'Successfully logged out user'
@@ -86,9 +83,7 @@ module.exports = {
 		} else res.status(401).send({ error: 'Could not find session' })
 	},
 	token: async (req, res) => {
-		const user = await AuthDAO.updateAccessToken({
-			refreshToken: req.cookies.RefreshToken
-		})
+		const user = await AuthDAO.updateAccessToken(req.cookies.RefreshToken)
 		if (user) {
 			const accessToken = jwt.sign(
 				{ email: user.email },

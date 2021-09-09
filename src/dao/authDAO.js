@@ -1,14 +1,12 @@
 let sessions
 
 module.exports = class AuthDAO {
-	static injectDB = async conn => {
+	static injectDB = async db => {
 		if (sessions) {
 			return
 		}
 		try {
-			sessions = await conn
-				.db(process.env.MONGO_DB_NAME)
-				.collection('sessions')
+			sessions = await db.collection('sessions')
 		} catch (err) {
 			console.error(
 				`Could not establish collection handle in authDAO: ${err}`
@@ -31,9 +29,9 @@ module.exports = class AuthDAO {
 		}
 	}
 
-    static findSession = async ({refreshToken}) => {
+    static findSession = async (refreshToken) => {
         try { 
-            const user = await sessions.findOne({ filter: refreshToken })
+            const user = await sessions.findOne({ filter: { refreshToken } })
             return { user }
         } catch (err) {
 			console.error(`Failed to find user session: ${err}`)
@@ -41,9 +39,9 @@ module.exports = class AuthDAO {
 		}
     }
 
-	static logout = async ({ email }) => {
+	static logout = async (email) => {
         try {
-            const { deletedCount } = await sessions.deleteOne({ filter: email })
+            const { deletedCount } = await sessions.deleteOne({ email })
 			if (deletedCount === 1) return { success: true }
 			return { success: false }
 		} catch (err) {
@@ -53,9 +51,9 @@ module.exports = class AuthDAO {
 	}
 
 
-	static updateAccessToken = async ({refreshToken}) => {
+	static updateAccessToken = async (refreshToken) => {
         try {
-            const user = await sessions.findOne({ filter: { refreshToken }})
+            const user = await sessions.findOne({ refreshToken })
             return { user }
         } catch (err) {
             console.error(`Failed to renew access token`)
