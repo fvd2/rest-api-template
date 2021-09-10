@@ -2,8 +2,8 @@
 RESTful API for managing user authentication and account management using Node.js, Express and MongoDB. It can easily be extended to serve as a back-end for web applications. It includes a testing setup based on [Jest-MongoDB ('Jest preset to run MongoDB memory server')](https://github.com/shelfio/jest-mongodb). The structure is partly inspired by the mflix API from MongoDB's 'MongoDB for JavaScript Developers' course (M220JS), which I recently completed. 
 
 ## Usage
-1. Clone repo
-2. Add values in local.env file
+1. Clone repo and install dependencies
+2. Add custom values in local.env file
 3. Rename local.env to .env
 
 ## Functionality
