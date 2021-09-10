@@ -31,8 +31,8 @@ module.exports = class AuthDAO {
 
     static findSession = async (refreshToken) => {
         try { 
-            const user = await sessions.findOne({ filter: { refreshToken } })
-            return { user }
+            const user = await sessions.findOne(refreshToken)
+            return user
         } catch (err) {
 			console.error(`Failed to find user session: ${err}`)
 			return { error: err }

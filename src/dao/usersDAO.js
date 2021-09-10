@@ -33,7 +33,6 @@ module.exports = class UsersDAO {
 	static deleteUser = async email => {
 		try {
 			const deleteUserResult = await users.deleteOne({ email })
-			const deleteSessionResult = await sessions.deleteOne({ email })
 			if (deleteUserResult.deletedCount === 1) return { success: true }
 			return { success: false }
 		} catch (err) {
@@ -56,7 +55,6 @@ module.exports = class UsersDAO {
 				},
 				{ $set: { email: newEmail } }
 			)
-			console.log(updateSessionResult)
 			if (
 				updateUserResult.modifiedCount === 1 &&
 				updateSessionResult.modifiedCount === 1

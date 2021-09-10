@@ -15,7 +15,7 @@ module.exports = {
 		const currentEmail = res.locals.email
 		const newEmail = req.body.email
 		const result = await UsersDAO.updateEmail(currentEmail, newEmail)
-		if (result.success) return res.status(200).send({ message: `Successfully updated email address to ${email}`})
-     	return res.status(400).send({message: 'bad request'})
+		if (result.success === true) return res.status(201).send({ message: `Successfully updated email address to ${newEmail}`})
+		return res.status(400).send({message: 'bad request'})
 	},
 }

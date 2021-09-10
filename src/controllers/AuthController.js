@@ -63,7 +63,7 @@ module.exports = {
 				process.env.REFRESH_TOKEN_SECRET,
 				{ expiresIn: 60 * 24 * 30 }
 			)
-			res.cookie('RefreshToken', refreshToken, {
+			res.cookie('refreshToken', refreshToken, {
 				secure: true,
 				httpOnly: true,
 				sameSite: true
@@ -72,7 +72,7 @@ module.exports = {
 		}
 	},
 	logout: async (req, res) => {
-		const user = await AuthDAO.findSession(req.cookies.RefreshToken)
+		const user = await AuthDAO.findSession(req.cookies)
 		if (user) {
 			const result = await AuthDAO.logout(user.email)
 			if (result.success) {
@@ -80,10 +80,11 @@ module.exports = {
 					message: 'Successfully logged out user'
 				})
 			} else res.status(401).send({error: 'Could not log user out'})
-		} else res.status(401).send({ error: 'Could not find session' })
+		} else res.status(404).send({ error: 'Could not find session' })
 	},
 	token: async (req, res) => {
 		const user = await AuthDAO.updateAccessToken(req.cookies.RefreshToken)
+
 		if (user) {
 			const accessToken = jwt.sign(
 				{ email: user.email },

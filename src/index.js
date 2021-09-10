@@ -18,8 +18,8 @@ MongoClient.connect(process.env.MONGO_URI, {
     console.error(err)
     process.exit(1)
 }).then(async client => {
-    await authDAO.injectDB(client)
-    await usersDAO.injectDB(client)
+    await authDAO.injectDB(client.db(process.env.MONGO_DB_NAME))
+    await usersDAO.injectDB(client.db(process.env.MONGO_DB_NAME))
     app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
 })
 
