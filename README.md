@@ -18,4 +18,4 @@ RESTful API for managing user authentication and account management using Node.j
 * Users can update their account information (currently only their e-mail address and password)
 
 ## Even better if: ideas for additions and further improvements
-* token-based email confirmation after registering and changing e=mail address
+* token-based email confirmation after registering and updating e-mail address
