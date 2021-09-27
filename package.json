@@ -1,7 +1,7 @@
 {
   "name": "auth",
   "version": "1.0.0",
-  "description": "",
+  "description": "RESTful API for authenticating users",
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll",
@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",

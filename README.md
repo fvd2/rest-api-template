@@ -1,5 +1,5 @@
 # rest-api-template
-RESTful API for managing user authentication and account management using Node.js, Express and MongoDB. It can easily be extended to serve as a back-end for web applications. It includes a testing setup based on [Jest-MongoDB ('Jest preset to run MongoDB memory server')](https://github.com/shelfio/jest-mongodb). The structure is partly inspired by the mflix API from MongoDB's 'MongoDB for JavaScript Developers' course (M220JS), which I recently completed. 
+RESTful API for managing user authentication and account management using Node.js, Express and MongoDB. It can easily be extended to serve as a back-end for web applications. It includes a testing setup based on [Jest-MongoDB ('Jest preset to run MongoDB memory server')](https://github.com/shelfio/jest-mongodb). The structure is partly inspired by the mflix API from MongoDB's 'MongoDB for JavaScript Developers' course (M220JS).
 
 ## Usage
 1. Clone repo and install dependencies
@@ -18,4 +18,4 @@ RESTful API for managing user authentication and account management using Node.j
 * Users can update their account information (currently only their e-mail address and password)
 
 ## Even better if: ideas for additions and further improvements
-* token-based email confirmation after registering and changing e=mail address
+* token-based email confirmation after registering and changing e-mail address
