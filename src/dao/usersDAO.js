@@ -1,24 +1,30 @@
 let users
+let credentials
 let sessions
 
 module.exports = class UsersDAO {
 	static injectDB = async db => {
-		if (users && sessions) {
+		if (users && credentials && sessions) {
 			return
 		}
 		try {
 			users = await db.collection('users')
+			credentials = await db.collection('credentials')
 			sessions = await db.collection('sessions')
 		} catch (err) {
 			console.error(
-				`Could not establish collection handles in userDAO: ${err}`
+				`Could not establish collection handles in usersDAO: ${err}`
 			)
 		}
 	}
 
 	static addUser = async (email, hash) => {
 		try {
-			await users.insertOne({ email, password: hash })
+			const userId = await users.insertOne({ email })
+			await credentials.insertOne({
+				userId: userId.insertedId,
+				password: hash
+			})
 			return { success: true }
 		} catch (err) {
 			console.error(`Failed to register user: ${err}`)
@@ -26,43 +32,49 @@ module.exports = class UsersDAO {
 		}
 	}
 
+	static getCredentials = async ObjectID => {
+		return await credentials.findOne({ userId: ObjectID }, { password: 1 })
+	}
+
 	static getUser = async email => {
 		return await users.findOne({ email })
 	}
 
-	static deleteUser = async email => {
-		try {
-			const deleteUserResult = await users.deleteOne({ email })
-			if (deleteUserResult.deletedCount === 1) return { success: true }
-			return { success: false }
-		} catch (err) {
-			console.error(`Failed to logout user: ${err}`)
-			return { error: err }
-		}
+	static getAccountDetails = async userId => {
+		return await users.findOne({ _id: userId })
 	}
 
-	static updateEmail = async (currentEmail, newEmail) => {
+	static deleteUser = async userId => {
 		try {
-			const updateUserResult = await users.updateOne(
-				{
-					email: currentEmail
-				},
-				{ $set: { email: newEmail } }
-			)
-			const updateSessionResult = await sessions.updateOne(
-				{
-					email: currentEmail
-				},
-				{ $set: { email: newEmail } }
-			)
+			const deleteCredentialsResult = await credentials.deleteOne({
+				userId
+			})
+			const deleteAccountResult = await users.deleteOne({ _id: userId })
 			if (
-				updateUserResult.modifiedCount === 1 &&
-				updateSessionResult.modifiedCount === 1
+				deleteCredentialsResult.deletedCount === 1 &&
+				deleteAccountResult.deletedCount === 1
 			)
 				return { success: true }
 			return { success: false }
 		} catch (err) {
-			console.error(`Failed to update email: ${err}`)
+			console.error(`Failed to delete user: ${err}`)
+			return { error: err }
+		}
+	}
+
+	static update = async (userId, updateObj) => {
+		try {
+			const updateAccountResult = await users.updateOne(
+				{
+					_id: userId
+				},
+				{ $set: updateObj }
+			)
+			if (updateAccountResult.modifiedCount === 1)
+				return { success: true }
+			return { success: false }
+		} catch (err) {
+			console.error(`Failed to update account: ${err}`)
 			return { error: err }
 		}
 	}
